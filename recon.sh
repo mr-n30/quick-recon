@@ -21,7 +21,7 @@ echo "Running waybackurls..."
 echo $DOMAIN | waybackurls | tee -a "$OUTPUT_DIR/wb.txt"
 
 echo "Running gau..."
-echo $DOMAIN |gau | tee -a "$OUTPUT_DIR/gau.txt"
+echo $DOMAIN | gau | tee -a "$OUTPUT_DIR/gau.txt"
 
 echo "Running hakrawler..."
 cat $OUTPUT_DIR/httpx.txt | hakrawler | tee -a "$OUTPUT_DIR/hk.txt"
@@ -30,8 +30,9 @@ echo "Running subjs..."
 cat $OUTPUT_DIR/hk.txt $OUTPUT_DIR/wb.txt $OUTPUT_DIR/gau.txt | subjs | tee -a "$OUTPUT_DIR/subjs.txt"
 
 echo "Running linkfinder..."
+source /opt/tools/linkfinder/venv/bin/activate
 for URL in $(cat $OUTPUT_DIR/subjs.txt); do
-    linkfinder -i "$URL" -o cli | tee -a "$OUTPUT_DIR/lf.txt"
+    python3 /opt/tools/linkfinder/linkfinder.py -i "$URL" -o cli | tee -a "$OUTPUT_DIR/lf.txt"
 done
 
 echo "[+] Reconnaissance completed. Results saved in $PWD/$OUTPUT_DIR :)"
