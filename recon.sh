@@ -15,7 +15,14 @@ subfinder -d $DOMAIN -o "$OUTPUT_DIR/sf.txt" -all
 
 echo "Running httpx..."
 httpx -l "$OUTPUT_DIR/subfinder.txt" -o "$OUTPUT_DIR/httpx.txt" \
-    -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" \
+    -title \
+    -status-code \
+    -content-length \
+    -redirects \
+    -web-server \
+    -tech-detect \
+    -silent
 
 echo "Running waybackurls..."
 echo $DOMAIN | waybackurls | tee -a "$OUTPUT_DIR/wb.txt"
