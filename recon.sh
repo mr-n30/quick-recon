@@ -59,9 +59,12 @@ httpx -l "$OUTPUT_DIR/sf.txt" -o "$OUTPUT_DIR/httpx.txt" \
   -status-code \
   -content-length \
   -redirects \
-  -web-server \
-  -tech-detect \
-  -silent
+  -server \
+  -td \
+  -title \
+  -sc \
+  -cl \
+  -silent 
 
 echo "Running waybackurls..."
 "${WAYBACK_INPUT_CMD[@]}" | waybackurls | tee -a "$OUTPUT_DIR/wb.txt"
