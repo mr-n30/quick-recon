@@ -23,6 +23,7 @@ export PATH="$PATH:$GOPATH/bin"
 
 # Append Go binaries to PATH in .bashrc for future sessions
 if ! grep -q 'export PATH=.*$GOPATH/bin' $HOME/.bashrc; then
+    echo 'export GOPATH="$HOME/go"' >> $HOME/.bashrc
     echo 'export PATH="$PATH:$GOPATH/bin"' >> $HOME/.bashrc
 fi
 
