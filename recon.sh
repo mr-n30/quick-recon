@@ -3,20 +3,23 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $0 -d <domain|domain_list_file> -o <output_dir>"
+  echo "Usage: $0 -d <domain|domain_list_file> -o <output_dir> [-f <exclude_subdomains_file_or_csv>]"
   echo
   echo "  -d  Single domain (example.com) or a file containing domains"
   echo "  -o  Output directory"
+  echo "  -f  Optional subfinder filter input (file or comma-separated subdomains to exclude)"
   exit 1
 }
 
 DOMAIN_INPUT=""
 OUTPUT_DIR=""
+EXCLUDE_FILTER=""
 
-while getopts ":d:o:" opt; do
+while getopts ":d:o:f:" opt; do
   case "$opt" in
     d) DOMAIN_INPUT="$OPTARG" ;;
     o) OUTPUT_DIR="$OPTARG" ;;
+    f) EXCLUDE_FILTER="$OPTARG" ;;
     *) usage ;;
   esac
 done
@@ -28,16 +31,20 @@ fi
 
 mkdir -p "$OUTPUT_DIR"
 
+SUBFINDER_FILTER_ARGS=()
+if [[ -n "$EXCLUDE_FILTER" ]]; then
+  echo "[+] Using subfinder filter input: $EXCLUDE_FILTER"
+  SUBFINDER_FILTER_ARGS=(-f "$EXCLUDE_FILTER")
+fi
+
 if [[ -f "$DOMAIN_INPUT" ]]; then
   echo "[+] Detected domain list file: $DOMAIN_INPUT"
-  SUBFINDER_INPUT_MODE="file"
-  SUBFINDER_CMD=(subfinder -dL "$DOMAIN_INPUT" -o "$OUTPUT_DIR/sf.txt" -all)
+  SUBFINDER_CMD=(subfinder -dL "$DOMAIN_INPUT" -o "$OUTPUT_DIR/sf.txt" -all "${SUBFINDER_FILTER_ARGS[@]}")
   WAYBACK_INPUT_CMD=(cat "$DOMAIN_INPUT")
   GAU_INPUT_CMD=(cat "$DOMAIN_INPUT")
 else
   echo "[+] Detected single domain: $DOMAIN_INPUT"
-  SUBFINDER_INPUT_MODE="domain"
-  SUBFINDER_CMD=(subfinder -d "$DOMAIN_INPUT" -o "$OUTPUT_DIR/sf.txt" -all)
+  SUBFINDER_CMD=(subfinder -d "$DOMAIN_INPUT" -o "$OUTPUT_DIR/sf.txt" -all "${SUBFINDER_FILTER_ARGS[@]}")
   WAYBACK_INPUT_CMD=(printf '%s\n' "$DOMAIN_INPUT")
   GAU_INPUT_CMD=(printf '%s\n' "$DOMAIN_INPUT")
 fi
