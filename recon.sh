@@ -58,7 +58,7 @@ httpx -l "$OUTPUT_DIR/sf.txt" -o "$OUTPUT_DIR/httpx.txt" \
   -title \
   -status-code \
   -content-length \
-  -redirects \
+  -fr \
   -server \
   -td \
   -title \
