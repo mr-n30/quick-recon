@@ -53,7 +53,7 @@ echo "Running subfinder..."
 "${SUBFINDER_CMD[@]}"
 
 echo "Running httpx..."
-httpx -l "$OUTPUT_DIR/sf.txt" -o "$OUTPUT_DIR/httpx.txt" \
+httpx -l "$OUTPUT_DIR/sf.txt" -o "$OUTPUT_DIR/httpx-full.txt" \
   -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" \
   -title \
   -status-code \
@@ -66,6 +66,8 @@ httpx -l "$OUTPUT_DIR/sf.txt" -o "$OUTPUT_DIR/httpx.txt" \
   -cl \
   -silent 
 
+awk -F ' ' '{print $1}' "$OUTPUT_DIR/httpx-full.txt" > "$OUTPUT_DIR/httpx.txt"
+
 echo "Running waybackurls..."
 "${WAYBACK_INPUT_CMD[@]}" | waybackurls | tee -a "$OUTPUT_DIR/wb.txt"
 
@@ -76,7 +78,9 @@ echo "Running hakrawler..."
 hakrawler < "$OUTPUT_DIR/httpx.txt" | tee -a "$OUTPUT_DIR/hk.txt"
 
 echo "Running subjs..."
-cat "$OUTPUT_DIR/hk.txt" "$OUTPUT_DIR/wb.txt" "$OUTPUT_DIR/gau.txt" | subjs | tee -a "$OUTPUT_DIR/subjs.txt"
+cat "$OUTPUT_DIR/hk.txt" "$OUTPUT_DIR/wb.txt" "$OUTPUT_DIR/gau.txt" | sed -E 's/\?.*$//g' | sort -u | subjs | tee -a "$OUTPUT_DIR/subjs-tmp.txt"
+sort -u "$OUTPUT_DIR/subjs-tmp.txt" > "$OUTPUT_DIR/subjs.txt"
+rm "$OUTPUT_DIR/subjs-tmp.txt"
 
 echo "Running linkfinder..."
 source /opt/tools/linkfinder/venv/bin/activate
