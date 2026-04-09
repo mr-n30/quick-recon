@@ -78,9 +78,7 @@ echo "Running hakrawler..."
 hakrawler < "$OUTPUT_DIR/httpx.txt" | tee -a "$OUTPUT_DIR/hk.txt"
 
 echo "Running subjs..."
-cat "$OUTPUT_DIR/hk.txt" "$OUTPUT_DIR/wb.txt" "$OUTPUT_DIR/gau.txt" | sed -E 's/\?.*$//g' | sort -u | subjs | tee -a "$OUTPUT_DIR/subjs-tmp.txt"
-sort -u "$OUTPUT_DIR/subjs-tmp.txt" > "$OUTPUT_DIR/subjs.txt"
-rm "$OUTPUT_DIR/subjs-tmp.txt"
+cat "$OUTPUT_DIR/hk.txt" "$OUTPUT_DIR/wb.txt" "$OUTPUT_DIR/gau.txt" | sed -E 's/\?.*$//g' | sort -u | subjs | sort -u >> "$OUTPUT_DIR/subjs-tmp.txt"
 
 echo "Running linkfinder..."
 source /opt/tools/linkfinder/venv/bin/activate
