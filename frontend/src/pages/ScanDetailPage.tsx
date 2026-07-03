@@ -105,6 +105,15 @@ export function ScanDetailPage() {
 
       {error ? <div className="error-banner">{error}</div> : null}
 
+      {detail?.status === "failed" ? (
+        <div className="scan-failure-alert" role="alert">
+          <span className="scan-failure-icon" aria-hidden="true">!</span>
+          <span>
+            Scan failed. Please check <a href="#scan-log">the log</a> to see the error.
+          </span>
+        </div>
+      ) : null}
+
       <div className="detail-grid">
         <section className="panel">
           <div className="panel-header">
@@ -138,7 +147,7 @@ export function ScanDetailPage() {
         </section>
       </div>
 
-      <section className="panel log-panel">
+      <section className="panel log-panel" id="scan-log">
         <div className="panel-header">
           <div>
             <p className="eyebrow">Execution</p>
