@@ -1,0 +1,29 @@
+name: quickrecon
+
+services:
+  app:
+    build:
+      context: .
+    image: quickrecon-web:local
+    ports:
+      - "${QUICKRECON_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      QUICKRECON_JWT_SECRET: "${QUICKRECON_JWT_SECRET:?Set QUICKRECON_JWT_SECRET in .env}"
+      QUICKRECON_CORS_ORIGINS: "${QUICKRECON_CORS_ORIGINS:-http://localhost:3001,http://127.0.0.1:3001}"
+    volumes:
+      - quickrecon-data:/app/storage
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,uid=1000,gid=1000
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+volumes:
+  quickrecon-data:

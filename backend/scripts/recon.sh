@@ -37,11 +37,19 @@ if [[ -z "$DOMAIN_INPUT" || -z "$OUTPUT_DIR" ]]; then
 fi
 
 require_command subfinder
-require_command httpx
 require_command waybackurls
 require_command gau
 require_command hakrawler
 require_command subjs
+
+if command -v httpx >/dev/null 2>&1; then
+  HTTPX_CMD=(httpx)
+elif command -v httpx-pd >/dev/null 2>&1; then
+  HTTPX_CMD=(httpx-pd)
+else
+  echo "[!] Missing required command: httpx or httpx-pd"
+  exit 1
+fi
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -68,7 +76,7 @@ echo "Running subfinder..."
 
 if [[ -s "$OUTPUT_DIR/sf.txt" ]]; then
   echo "Running httpx..."
-  httpx -l "$OUTPUT_DIR/sf.txt" -o "$OUTPUT_DIR/httpx-full.txt" \
+  "${HTTPX_CMD[@]}" -l "$OUTPUT_DIR/sf.txt" -o "$OUTPUT_DIR/httpx-full.txt" \
     -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" \
     -title \
     -status-code \
@@ -107,8 +115,11 @@ cat "$OUTPUT_DIR/hk.txt" "$OUTPUT_DIR/wb.txt" "$OUTPUT_DIR/gau.txt" \
 echo "Running linkfinder..."
 LINKFINDER_SCRIPT="/opt/tools/linkfinder/linkfinder.py"
 LINKFINDER_VENV_PYTHON="/opt/tools/linkfinder/venv/bin/python"
+LINKFINDER_CMD=()
 
-if [[ -f "$LINKFINDER_SCRIPT" ]]; then
+if command -v linkfinder >/dev/null 2>&1; then
+  LINKFINDER_CMD=(linkfinder)
+elif [[ -f "$LINKFINDER_SCRIPT" ]]; then
   if [[ -x "$LINKFINDER_VENV_PYTHON" ]]; then
     LINKFINDER_PYTHON="$LINKFINDER_VENV_PYTHON"
   else
@@ -116,13 +127,17 @@ if [[ -f "$LINKFINDER_SCRIPT" ]]; then
     LINKFINDER_PYTHON="python3"
   fi
 
+  LINKFINDER_CMD=("$LINKFINDER_PYTHON" "$LINKFINDER_SCRIPT")
+fi
+
+if [[ ${#LINKFINDER_CMD[@]} -gt 0 ]]; then
   : > "$OUTPUT_DIR/lf.txt"
   while IFS= read -r URL; do
     [[ -z "$URL" ]] && continue
-    "$LINKFINDER_PYTHON" "$LINKFINDER_SCRIPT" -i "$URL" -o cli | tee -a "$OUTPUT_DIR/lf.txt"
+    "${LINKFINDER_CMD[@]}" -i "$URL" -o cli | tee -a "$OUTPUT_DIR/lf.txt"
   done < "$OUTPUT_DIR/subjs.txt"
 else
-  echo "[!] Skipping linkfinder because $LINKFINDER_SCRIPT was not found."
+  echo "[!] Skipping linkfinder because neither the command nor $LINKFINDER_SCRIPT was found."
   : > "$OUTPUT_DIR/lf.txt"
 fi
 

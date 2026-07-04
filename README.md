@@ -29,6 +29,12 @@ sudo ./install-ubuntu.sh
 sudo ./install-arch.sh
 ```
 
+The Arch installer accepts `--source blackarch|auto|go`. The default, `blackarch`, requires the BlackArch repository and uses its packages when available. Tools missing from BlackArch fall back to their upstream Go modules. Use `--source auto` on plain Arch to use BlackArch when configured, or `--source go` to install directly from upstream:
+
+```bash
+sudo ./install-arch.sh --source blackarch
+```
+
 ### BlackArch
 
 Follow the official [BlackArch installation instructions](https://blackarch.org/downloads.html), then run the Arch installer above if any QuickRecon dependencies are missing.
@@ -56,6 +62,28 @@ npm run dev
 
 Open `http://127.0.0.1:5173`. The frontend proxies API requests to the backend at `http://127.0.0.1:3001`.
 
+## Run with Docker
+
+The production container builds the React frontend, installs production-only backend dependencies, compiles pinned recon tools, runs as a non-root user, and persists the SQLite database and scan results in a named volume.
+
+Create the local environment file and replace the placeholder with a random secret:
+
+```bash
+cp .env.example .env
+openssl rand -hex 32
+```
+
+Build and start the application:
+
+```bash
+docker compose up --build -d
+docker compose ps
+```
+
+Open `http://127.0.0.1:3001`. Follow logs with `docker compose logs -f app` and stop the application with `docker compose down`. The `quickrecon-data` volume is retained; use `docker compose down --volumes` only when you intend to delete the database and scan results.
+
+The image includes only tools invoked by the containerized scan workflow. The host installers include additional workstation utilities such as Nuclei and ffuf.
+
 ## Production-style build
 
 ```bash
@@ -80,7 +108,7 @@ The scan workflow requires these commands on `PATH`:
 - `hakrawler`
 - `subjs`
 
-LinkFinder is optional and is detected under `/opt/tools/linkfinder`.
+LinkFinder is optional and is detected either on `PATH` or under `/opt/tools/linkfinder`.
 
 ## Storage
 
